@@ -55,7 +55,10 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                 final employee = snapshot.data![index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
-                  child: EmployeeCard(employee: employee),
+                  child: EmployeeCard(
+                    employee: employee,
+                    onDelete: _refreshEmployees,
+                  ),
                 );
               },
             );
