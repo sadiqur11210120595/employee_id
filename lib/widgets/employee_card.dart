@@ -125,60 +125,103 @@ class _EmployeeCardState extends State<EmployeeCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            RepaintBoundary(
-              key: _globalKey,
-              child: IdCardWidget(
-                employee: widget.employee,
-                width: 350, // Display size for preview
-                height: 220,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isSmallScreen = screenWidth < 600;
+        
+        return Card(
+          elevation: 4,
+          margin: EdgeInsets.all(screenWidth * 0.02),
+          child: Padding(
+            padding: EdgeInsets.all(screenWidth * 0.02),
+            child: Column(
               children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _printCard,
-                    icon: const Icon(Icons.print),
-                    label: const Text('Print ID Card'),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
+                RepaintBoundary(
+                  key: _globalKey,
+                  child: IdCardWidget(
+                    employee: widget.employee,
+                    width: screenWidth * 0.9,
+                    height: screenWidth * 0.6,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isDeleting ? null : _deleteEmployee,
-                    icon: _isDeleting 
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.delete, color: Colors.red),
-                    label: Text(
-                      _isDeleting ? 'Deleting...' : 'Delete',
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.red,
-                    ),
-                  ),
-                ),
+                SizedBox(height: screenWidth * 0.04),
+                isSmallScreen
+                    ? Column(
+                        children: [
+                          _buildButton(
+                            onPressed: _printCard,
+                            icon: Icons.print,
+                            label: 'Print ID Card',
+                            screenWidth: screenWidth,
+                          ),
+                          SizedBox(height: screenWidth * 0.02),
+                          _buildButton(
+                            onPressed: _isDeleting ? null : _deleteEmployee,
+                            icon: _isDeleting ? null : Icons.delete,
+                            label: _isDeleting ? 'Deleting...' : 'Delete',
+                            screenWidth: screenWidth,
+                            isDelete: true,
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: _buildButton(
+                              onPressed: _printCard,
+                              icon: Icons.print,
+                              label: 'Print ID Card',
+                              screenWidth: screenWidth,
+                            ),
+                          ),
+                          SizedBox(width: screenWidth * 0.02),
+                          Expanded(
+                            child: _buildButton(
+                              onPressed: _isDeleting ? null : _deleteEmployee,
+                              icon: _isDeleting ? null : Icons.delete,
+                              label: _isDeleting ? 'Deleting...' : 'Delete',
+                              screenWidth: screenWidth,
+                              isDelete: true,
+                            ),
+                          ),
+                        ],
+                      ),
               ],
             ),
-          ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildButton({
+    required VoidCallback? onPressed,
+    IconData? icon,
+    required String label,
+    required double screenWidth,
+    bool isDelete = false,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: icon != null
+          ? Icon(icon, color: isDelete ? Colors.red : null)
+          : SizedBox(
+              width: screenWidth * 0.04,
+              height: screenWidth * 0.04,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+      label: Text(
+        label,
+        style: TextStyle(
+          color: isDelete ? Colors.red : null,
+          fontSize: screenWidth * 0.03,
         ),
+      ),
+      style: ElevatedButton.styleFrom(
+        minimumSize: Size(double.infinity, screenWidth * 0.1),
+        backgroundColor: isDelete ? Colors.white : null,
+        foregroundColor: isDelete ? Colors.red : null,
       ),
     );
   }

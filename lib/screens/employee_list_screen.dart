@@ -31,39 +31,56 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
       appBar: AppBar(
         title: const Text('Employee List'),
       ),
-      body: RefreshIndicator(
-        onRefresh: _refreshEmployees,
-        child: FutureBuilder<List<Employee>>(
-          future: _employeesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenWidth = constraints.maxWidth;
+          final padding = screenWidth * 0.02;
 
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
+          return RefreshIndicator(
+            onRefresh: _refreshEmployees,
+            child: FutureBuilder<List<Employee>>(
+              future: _employeesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No employees found'));
-            }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'Error: ${snapshot.error}',
+                      style: TextStyle(fontSize: screenWidth * 0.03),
+                    ),
+                  );
+                }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                final employee = snapshot.data![index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: EmployeeCard(
-                    employee: employee,
-                    onDelete: _refreshEmployees,
-                  ),
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No employees found',
+                      style: TextStyle(fontSize: screenWidth * 0.03),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.all(padding),
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    final employee = snapshot.data![index];
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: padding),
+                      child: EmployeeCard(
+                        employee: employee,
+                        onDelete: _refreshEmployees,
+                      ),
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

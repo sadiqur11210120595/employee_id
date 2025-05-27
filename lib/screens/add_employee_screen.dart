@@ -73,105 +73,126 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add Employee')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  width: 150,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: _imageFile != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: kIsWeb
-                              ? Image.network(
-                                  _imageFile!.path,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.error),
-                                )
-                              : Image.file(
-                                  File(_imageFile!.path),
-                                  fit: BoxFit.cover,
-                                ),
-                        )
-                      : const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_a_photo, size: 40),
-                            Text('Add Photo'),
-                          ],
-                        ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Full Name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) => value!.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _companyController,
-                decoration: const InputDecoration(
-                  labelText: 'Company Name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) => value!.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _designationController,
-                decoration: const InputDecoration(
-                  labelText: 'designation',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) => value!.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Phone',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) => value!.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _addressController,
-                decoration: const InputDecoration(
-                  labelText: 'Address',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) => value!.isEmpty ? 'Required' : null,
-              ),
-              // Repeat similar fields for company, designation, phone, address
-              const SizedBox(height: 24),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _submitForm,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenWidth = constraints.maxWidth;
+          final isSmallScreen = screenWidth < 600;
+          final padding = screenWidth * 0.02;
+          final imageSize = screenWidth * 0.3;
+          final fontSize = screenWidth * 0.03;
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(padding),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: imageSize,
+                      height: imageSize,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text('Save Employee'),
+                      child: _imageFile != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: kIsWeb
+                                  ? Image.network(
+                                      _imageFile!.path,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          const Icon(Icons.error),
+                                    )
+                                  : Image.file(
+                                      File(_imageFile!.path),
+                                      fit: BoxFit.cover,
+                                    ),
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_a_photo, size: imageSize * 0.3),
+                                Text(
+                                  'Add Photo',
+                                  style: TextStyle(fontSize: fontSize),
+                                ),
+                              ],
+                            ),
                     ),
-            ],
-          ),
-        ),
+                  ),
+                  SizedBox(height: padding * 2),
+                  if (isSmallScreen) ...[
+                    _buildTextField(_nameController, 'Full Name', fontSize),
+                    SizedBox(height: padding),
+                    _buildTextField(_companyController, 'Company Name', fontSize),
+                    SizedBox(height: padding),
+                    _buildTextField(_designationController, 'Designation', fontSize),
+                    SizedBox(height: padding),
+                    _buildTextField(_phoneController, 'Phone', fontSize),
+                    SizedBox(height: padding),
+                    _buildTextField(_addressController, 'Address', fontSize),
+                  ] else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              _buildTextField(_nameController, 'Full Name', fontSize),
+                              SizedBox(height: padding),
+                              _buildTextField(_companyController, 'Company Name', fontSize),
+                              SizedBox(height: padding),
+                              _buildTextField(_designationController, 'Designation', fontSize),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: padding),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              _buildTextField(_phoneController, 'Phone', fontSize),
+                              SizedBox(height: padding),
+                              _buildTextField(_addressController, 'Address', fontSize),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  SizedBox(height: padding * 2),
+                  _isLoading
+                      ? CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: _submitForm,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, screenWidth * 0.1),
+                          ),
+                          child: Text(
+                            'Save Employee',
+                            style: TextStyle(fontSize: fontSize),
+                          ),
+                        ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label, double fontSize) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        labelStyle: TextStyle(fontSize: fontSize),
+      ),
+      style: TextStyle(fontSize: fontSize),
+      validator: (value) => value!.isEmpty ? 'Required' : null,
     );
   }
 
